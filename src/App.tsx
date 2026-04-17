@@ -16,8 +16,8 @@ import {
   Video,
   Send
 } from "lucide-react";
-import { generateVideoPrompt } from "./lib/gemini";
 import { cn } from "./lib/utils";
+import { generateVideoPrompt } from "./lib/gemini";
 
 export default function App() {
   const [topic, setTopic] = useState("");
@@ -44,31 +44,24 @@ export default function App() {
 
   const handleGenerate = async () => {
     if (!topic.trim()) return;
+
     setLoading(true);
     setResult(""); // Clear previous result
     try {
-      const response = await fetch("/api/generate-prompt", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic, details }),
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to generate");
-      }
-      
-      setResult(data.prompt);
+      const prompt = await generateVideoPrompt(topic, details);
+      setResult(prompt);
     } catch (error: any) {
-      console.error(error);
-      let errorMessage = "Ошибка при генерации. Попробуйте еще раз.";
-      if (error?.message?.includes("API_KEY_INVALID") || error?.message?.includes("API key not valid")) {
-        errorMessage = "❌ Недействительный API ключ. Проверьте правильность вставки в панели Secrets.";
-      } else if (error?.message?.includes("API_KEY_MISSING")) {
-        errorMessage = "⚠️ API ключ не найден в системе (на сервере). Пожалуйста, убедитесь, что GEMINI_API_KEY добавлен в панель Secrets и приложение перезапущено.";
+      console.error("Client Error:", error);
+      let errorMessage = "Ошибка при генерации. ";
+      
+      if (error?.message?.includes("API_KEY_MISSING") || error?.message?.includes("Ключ в Secrets не настроен") || error?.message?.includes("Ключ MOROZOV не найден")) {
+        errorMessage = "⚠️ Ошибка конфигурации: Ключ MOROZOV не найден в Secrets. Владельцу нужно создать секрет MOROZOV и вставить туда код AIza...";
+      } else if (error?.message?.includes("invalid") || error?.message?.includes("not valid") || error?.message?.includes("403") || error?.message?.includes("401")) {
+        errorMessage = "❌ Ошибка: API ключ MOROZOV недействителен или заблокирован.";
       } else if (error?.message?.includes("quota") || error?.message?.includes("429")) {
-        errorMessage = "⏳ Лимит исчерпан. Пожалуйста, подождите 1-2 минуты.";
+        errorMessage = "⏳ Лимит запросов временно исчерпан. Пожалуйста, подождите минуту.";
+      } else {
+        errorMessage += (error.message || "Попробуйте еще раз.");
       }
       setResult(errorMessage);
     } finally {
