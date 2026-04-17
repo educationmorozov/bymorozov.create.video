@@ -1,11 +1,17 @@
 import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+const getAi = () => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("API_KEY_MISSING");
+  }
+  return new GoogleGenAI({ apiKey });
+};
 
 export async function generateVideoPrompt(topic: string, details: string) {
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error("API_KEY_MISSING: Gemini API Key is not configured in environment variables.");
-  }
+  console.log("Generating prompt for:", { topic, details });
+  
+  const ai = getAi();
 
   const systemPrompt = `Ты профессиональный режиссер. Превращай ввод пользователя в детальный английский промпт для модели Veo 3.1.
 - Если тема связана с эмоциями (ссора, развод), обязательно добавляй: "cinematic, photorealistic, emotional facial expressions, moody lighting, 4k, realistic skin textures". 
@@ -17,7 +23,7 @@ export async function generateVideoPrompt(topic: string, details: string) {
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+      contents: userPrompt,
       config: {
         systemInstruction: systemPrompt,
         temperature: 0.7,
@@ -42,9 +48,19 @@ export async function generateVideoPrompt(topic: string, details: string) {
       },
     });
 
-    return response.text?.trim() || "Failed to generate prompt.";
-  } catch (error) {
+    const result = response.text;
+    console.log("Gemini Response:", result);
+    
+    if (!result) {
+      throw new Error("Empty response from Gemini");
+    }
+
+    return result.trim();
+  } catch (error: any) {
     console.error("Gemini Error:", error);
+    if (error?.message?.includes("API_KEY_MISSING")) {
+      throw new Error("API_KEY_MISSING");
+    }
     throw error;
   }
 }

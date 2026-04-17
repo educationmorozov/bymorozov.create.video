@@ -53,11 +53,11 @@ export default function App() {
       console.error(error);
       let errorMessage = "Ошибка при генерации. Попробуйте еще раз.";
       if (error?.message?.includes("API_KEY_INVALID") || error?.message?.includes("API key not valid")) {
-        errorMessage = "Ошибка: Недействительный API ключ. Пожалуйста, проверьте настройки в панели Secrets.";
+        errorMessage = "❌ Недействительный API ключ. Проверьте правильность вставки в панели Secrets.";
       } else if (error?.message?.includes("API_KEY_MISSING")) {
-        errorMessage = "Ошибка: API ключ не найден. Пожалуйста, добавьте GEMINI_API_KEY в панель Secrets.";
+        errorMessage = "⚠️ API ключ не найден! Пожалуйста, добавьте GEMINI_API_KEY в панель Secrets (иконка шестеренки или замка слева внизу).";
       } else if (error?.message?.includes("quota") || error?.message?.includes("429")) {
-        errorMessage = "Ошибка: Превышена квота запросов. Пожалуйста, подождите немного.";
+        errorMessage = "⏳ Лимит исчерпан. Пожалуйста, подождите 1-2 минуты (бесплатный уровень API имеет ограничения по частоте).";
       }
       setResult(errorMessage);
     } finally {
