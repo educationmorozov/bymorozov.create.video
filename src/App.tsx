@@ -47,17 +47,28 @@ export default function App() {
     setLoading(true);
     setResult(""); // Clear previous result
     try {
-      const prompt = await generateVideoPrompt(topic, details);
-      setResult(prompt);
+      const response = await fetch("/api/generate-prompt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic, details }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to generate");
+      }
+      
+      setResult(data.prompt);
     } catch (error: any) {
       console.error(error);
       let errorMessage = "Ошибка при генерации. Попробуйте еще раз.";
       if (error?.message?.includes("API_KEY_INVALID") || error?.message?.includes("API key not valid")) {
         errorMessage = "❌ Недействительный API ключ. Проверьте правильность вставки в панели Secrets.";
       } else if (error?.message?.includes("API_KEY_MISSING")) {
-        errorMessage = "⚠️ API ключ не найден! Пожалуйста, добавьте GEMINI_API_KEY в панель Secrets (иконка шестеренки или замка слева внизу).";
+        errorMessage = "⚠️ API ключ не найден в системе (на сервере). Пожалуйста, убедитесь, что GEMINI_API_KEY добавлен в панель Secrets и приложение перезапущено.";
       } else if (error?.message?.includes("quota") || error?.message?.includes("429")) {
-        errorMessage = "⏳ Лимит исчерпан. Пожалуйста, подождите 1-2 минуты (бесплатный уровень API имеет ограничения по частоте).";
+        errorMessage = "⏳ Лимит исчерпан. Пожалуйста, подождите 1-2 минуты.";
       }
       setResult(errorMessage);
     } finally {
