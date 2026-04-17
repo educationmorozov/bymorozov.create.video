@@ -1,11 +1,12 @@
-import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 
 export async function generateVideoPrompt(topic: string, details: string) {
-  // Try to find the key in baked-in environments
-  const apiKey = process.env.MOROZOV || process.env.GEMINI_API_KEY;
+  // Use the standard environment variable name for Gemini in AI Studio
+  // Note: For public sharing, it's CRITICAL to have the key in the Secrets tab
+  const apiKey = process.env.GEMINI_API_KEY || (process.env as any).MOROZOV;
   
   if (!apiKey || apiKey === "al studio free tier" || apiKey === "MY_GEMINI_API_KEY" || apiKey.trim() === "") {
-    console.error("API Key Check Failed. Value:", apiKey);
+    console.error("API Key check fail on frontend. Value:", apiKey);
     throw new Error("API_KEY_MISSING");
   }
 
@@ -35,7 +36,7 @@ export async function generateVideoPrompt(topic: string, details: string) {
 
     return result.trim();
   } catch (error: any) {
-    console.error("Gemini Error:", error);
+    console.error("Gemini Frontend Error:", error);
     throw error;
   }
 }

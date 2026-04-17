@@ -51,13 +51,13 @@ export default function App() {
       const prompt = await generateVideoPrompt(topic, details);
       setResult(prompt);
     } catch (error: any) {
-      console.error("Client Error:", error);
-      let errorMessage = "Ошибка при генерации. ";
+      console.error("Client side error:", error);
+      let errorMessage = "Ошибка: ";
       
-      if (error?.message?.includes("API_KEY_MISSING") || error?.message?.includes("Ключ в Secrets не настроен") || error?.message?.includes("Ключ MOROZOV не найден")) {
-        errorMessage = "⚠️ Ошибка конфигурации: Ключ MOROZOV не найден в Secrets. Владельцу нужно создать секрет MOROZOV и вставить туда код AIza...";
-      } else if (error?.message?.includes("invalid") || error?.message?.includes("not valid") || error?.message?.includes("403") || error?.message?.includes("401")) {
-        errorMessage = "❌ Ошибка: API ключ MOROZOV недействителен или заблокирован.";
+      if (error?.message?.includes("API_KEY_MISSING") || error?.message?.includes("Ключ MOROZOV не найден")) {
+        errorMessage = "⚠️ Ошибка конфигурации: Ключ MOROZOV не найден в Secrets. Владельцу нужно добавить секрет MOROZOV и вставить туда код AIza...";
+      } else if (error?.error?.status === "PERMISSION_DENIED" || error?.message?.includes("denied") || error?.message?.includes("403")) {
+        errorMessage = "❌ Доступ заблокирован Google (403 Permission Denied). Обычно это значит, что ключ недействителен или ваш проект ограничен.";
       } else if (error?.message?.includes("quota") || error?.message?.includes("429")) {
         errorMessage = "⏳ Лимит запросов временно исчерпан. Пожалуйста, подождите минуту.";
       } else {
