@@ -54,7 +54,9 @@ export default function App() {
       console.error("Client side error:", error);
       let errorMessage = "Ошибка: ";
       
-      if (error?.message?.includes("API_KEY_MISSING") || error?.message?.includes("Ключ MOROZOV не найден")) {
+      if (error?.message?.includes("API_KEY_MISSING_IN_BUILD")) {
+        errorMessage = "⚠️ Ошибка сборки: Ключ MOROZOV не был включен в версию сайта. Пожалуйста, убедитесь, что секрет MOROZOV заполнен, и попробуйте обновить страницу позже.";
+      } else if (error?.message?.includes("API_KEY_MISSING") || error?.message?.includes("Ключ MOROZOV не найден")) {
         errorMessage = "⚠️ Ошибка конфигурации: Ключ MOROZOV не найден в Secrets. Владельцу нужно добавить секрет MOROZOV и вставить туда код AIza...";
       } else if (error?.error?.status === "PERMISSION_DENIED" || error?.message?.includes("denied") || error?.message?.includes("403")) {
         errorMessage = "❌ Доступ заблокирован Google (403 Permission Denied). Обычно это значит, что ключ недействителен или ваш проект ограничен.";
@@ -276,10 +278,15 @@ export default function App() {
         </div>
 
         {/* Footer */}
-        <footer className="mt-24 text-center border-t border-zinc-900 pt-10">
+        <footer className="mt-24 text-center border-t border-zinc-900 pt-10 space-y-4">
           <p className="text-zinc-700 text-[10px] tracking-[0.4em] uppercase font-bold">
             bymorozov © {new Date().getFullYear()}
           </p>
+          {process.env.BUILD_TIME && (
+            <p className="text-zinc-800 text-[8px] tracking-widest uppercase font-mono">
+              Live Version: {process.env.BUILD_TIME}
+            </p>
+          )}
         </footer>
       </main>
     </div>

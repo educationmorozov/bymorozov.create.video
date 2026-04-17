@@ -8,6 +8,10 @@ export default defineConfig(({mode}) => {
   return {
     plugins: [react(), tailwindcss()],
     base: './',
+    define: {
+      'process.env.GEMINI_API_KEY': JSON.stringify(env.MOROZOV || env.GEMINI_API_KEY || process.env.MOROZOV || process.env.GEMINI_API_KEY || ""),
+      'process.env.BUILD_TIME': JSON.stringify(new Date().toLocaleString()),
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
