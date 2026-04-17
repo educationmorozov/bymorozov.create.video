@@ -10,6 +10,7 @@ export default defineConfig(({mode}) => {
     base: './',
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(process.env.MOROZOV || process.env.GEMINI_API_KEY || ""),
+      'process.env.MOROZOV': JSON.stringify(process.env.MOROZOV || ""),
     },
     resolve: {
       alias: {

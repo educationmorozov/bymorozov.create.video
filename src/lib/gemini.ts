@@ -1,10 +1,11 @@
 import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from "@google/genai";
 
 export async function generateVideoPrompt(topic: string, details: string) {
-  // Key is baked into process.env.GEMINI_API_KEY by vite.config.ts from MOROZOV secret
-  const apiKey = process.env.GEMINI_API_KEY;
+  // Try to find the key in baked-in environments
+  const apiKey = process.env.MOROZOV || process.env.GEMINI_API_KEY;
   
-  if (!apiKey || apiKey === "al studio free tier" || apiKey === "MY_GEMINI_API_KEY") {
+  if (!apiKey || apiKey === "al studio free tier" || apiKey === "MY_GEMINI_API_KEY" || apiKey.trim() === "") {
+    console.error("API Key Check Failed. Value:", apiKey);
     throw new Error("API_KEY_MISSING");
   }
 
